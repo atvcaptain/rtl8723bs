@@ -46,6 +46,9 @@
 #endif
 	#include <linux/sem.h>
 	#include <linux/sched.h>
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0))
+	#include <linux/sched/signal.h>
+#endif
 	#include <linux/etherdevice.h>
 	#include <linux/wireless.h>
 	#include <net/iw_handler.h>
@@ -270,8 +273,12 @@ __inline static void _init_timer(_timer *ptimer,_nic_hdl nic_hdl,void *pfunc,voi
 {
 	//setup_timer(ptimer, pfunc,(u32)cntx);	
 	ptimer->function = pfunc;
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(4, 15, 0))
 	ptimer->data = (unsigned long)cntx;
 	init_timer(ptimer);
+#else
+	timer_setup(ptimer, pfunc, 0);
+#endif
 }
 
 __inline static void _set_timer(_timer *ptimer,u32 delay_time)
